@@ -2,7 +2,7 @@ import numpy as np
 
 class Game:
     def __init__(self):
-        self.board = np.zeros(shape=(3,3))
+        self.board = np.zeros(shape=(3,3),dtype=np.uint8)
         self.player = 1
         self.bot = 2
 
@@ -11,10 +11,10 @@ class Game:
         if self.board[y,x] == 0:
             self.board[y,x] = self.player
         else:
-            return print("Illegal move, try another one")
+            return True,tuple(self.board.flatten())
 
 
-        # bot move
+        # bot move randomly
         count = 0
         while True:
             x = np.random.randint(low=0,high=3)
@@ -23,34 +23,39 @@ class Game:
                 self.board[y,x] = self.bot
                 break
             count += 1
-            if count >20:
+            if count >30:
                 print("No place left!")
                 break
 
+        return False,tuple(self.board.flatten())
 
     def game_state(self):
         for row in self.board:
             if (row == 1).all():
-                return True
+                return (True, 10, True)
             elif (row == 2).all():
-                return True
+                return (True, -10, False)
 
         for col in self.board.T:
             if (col == 1).all():
-                return True
+                return (True, 10, True)
             elif (col == 2).all():
-                return True
+                return (True, -10, False)
 
         if (self.board.diagonal() == 1).all():
-            return True
+            return (True, 10, True)
         elif (self.board.diagonal() == 2).all():
-            return True
+            return (True, -10, False)
 
         if (self.board[[0,1,2],[2,1,0]] == 1).all():
-            return True
+            return (True, 10, True )
         elif (self.board[[0,1,2],[2,1,0]] == 2).all():
-            return True
+            return (True, -10, False)
 
+        if (self.board != 0).all():
+            return (True, -10, False)
+
+        return (False,-1, False)
 
 if __name__ == "__main__":
     game = Game()
