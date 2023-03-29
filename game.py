@@ -27,6 +27,9 @@ class Game:
         return False,tuple(self.board.flatten())
 
     def game_state(self):
+        """Check if the game is won or lost. \n
+        Return if game is done, the reward +10 if won, -10 if lost, -1 if game continues \n
+        And if game is won or not"""
         for row in self.board:
             if (row == 1).all():
                 return (True, 10, True)
