@@ -1,39 +1,37 @@
 from game import Game
 import numpy as np
+import matplotlib.pyplot as plt
+import pickle
+from matplotlib import style
 
+style.use("ggplot")
 
-EPISODE = 40000
-LEARNING_RATE = 0.1
+# Learning variable
+EPISODE = 10_000
+LEARNING_RATE = 0.5
 DISCOUNT = 0.95
+
 # Initializing the env
 env = Game()
 
 # Create q_table
 q_table = {}
 while len(q_table) != 3**9:
-    q_table[tuple(np.random.randint(0,3,size=(9)))] = np.random.uniform(low=-1,high=1,size=9)
+    q_table[tuple(np.random.randint(0,3,size=(9)))] = np.random.uniform(low=-1,high=0,size=9)
 
+
+# 9 action possible, one for every position on the board
 def get_action(n):
-    if n == 0:
-        return (0,0)
-    if n == 1:
-        return (0,1)
-    if n == 2:
-        return (0,2)
-    if n == 3:
-        return (1,0)
-    if n == 4:
-        return (1,1)
-    if n == 5:
-        return (1,2)
-    if n == 6:
-        return (2,0)
-    if n == 7:
-        return (2,1)
-    if n == 8:
-        return (2,2)
+    actions = {0:(0,0), 1:(0,1), 2:(0,2),
+               3:(1,0), 4:(1,1), 5:(1,2),
+               6:(2,0), 7:(2,1), 8:(2,2)}
+    return actions[n]
 
 
+
+reward_saved = []
+
+# Training loop
 for ep in range(EPISODE):
     total_reward = 0
     env = Game()
@@ -45,12 +43,14 @@ for ep in range(EPISODE):
         illegal,new_state = env.move(*action)
         #print(env.board)
         done, reward, win = env.game_state()
+
+        # Penalty for making an illegal move
         if illegal:
             reward -=5
             done=True
 
-        # q_value update
-        if not done:
+        # Update q_value with bellman equation
+        if not win:
             max_futur_q = np.max(q_table[new_state])
             current_q = q_table[state][n]
             new_q = (1 - LEARNING_RATE) * current_q + LEARNING_RATE*(reward + DISCOUNT*max_futur_q)
@@ -58,6 +58,16 @@ for ep in range(EPISODE):
 
         state=new_state
         total_reward += reward
+    if win:
+        q_table[state][n] = 0
+        print(f"We won at episode {ep}, total reward : {total_reward}")
 
-        if win:
-            print(f"We won at episode {ep}, total reward : {total_reward}")
+    reward_saved.append(total_reward)
+
+fig,axes = plt.subplots(1,2)
+axes[0].hist(reward_saved)
+axes[1].plot([i for i in range(EPISODE)],reward_saved)
+plt.savefig("rewards.png")
+with open('q_table.pkl','wb') as f:
+    pickle.dump(q_table,f)
+    print("Q_table saved successfully")

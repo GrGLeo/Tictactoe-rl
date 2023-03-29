@@ -7,6 +7,8 @@ class Game:
         self.bot = 2
 
     def move(self,x,y):
+        """Take in, placement with x and y on the game board. \n
+        Return if move was illegal, and state of the board after the move"""
         # player move
         if self.board[y,x] == 0:
             self.board[y,x] = self.player
@@ -15,17 +17,12 @@ class Game:
 
 
         # bot move randomly
-        count = 0
-        while True:
-            x = np.random.randint(low=0,high=3)
-            y = np.random.randint(low=0,high=3)
-            if self.board[y,x] == 0:
-                self.board[y,x] = self.bot
-                break
-            count += 1
-            if count >30:
-                print("No place left!")
-                break
+        x_pos,y_pos = np.where(self.board == 0)
+        if len(x_pos) > 0:
+            pos = np.random.randint(len(x_pos))
+            x = x_pos[pos]
+            y = y_pos[pos]
+            self.board[x,y] = self.bot
 
         return False,tuple(self.board.flatten())
 
