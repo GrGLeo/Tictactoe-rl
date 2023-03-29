@@ -10,6 +10,8 @@ style.use("ggplot")
 EPISODE = 10_000
 LEARNING_RATE = 0.5
 DISCOUNT = 0.95
+epsilon = 0.95
+epsilon_decay = 0.999
 
 # Initializing the env
 env = Game()
@@ -38,10 +40,17 @@ for ep in range(EPISODE):
     state = tuple(env.board.flatten())
     done = False
     while not done:
-        n = np.argmax(q_table[state])
-        action = get_action(n)
+        # Exploitation
+        if np.random.random() > epsilon:
+            n = np.argmax(q_table[state])
+            action = get_action(n)
+        # Exploration
+        else:
+            n = np.random.randint(0,9)
+            action = get_action(n)
+
+        # Taking step
         illegal,new_state = env.move(*action)
-        #print(env.board)
         done, reward, win = env.game_state()
 
         # Penalty for making an illegal move
@@ -56,18 +65,27 @@ for ep in range(EPISODE):
             new_q = (1 - LEARNING_RATE) * current_q + LEARNING_RATE*(reward + DISCOUNT*max_futur_q)
             q_table[state][n] = new_q
 
+        # Set up next step
         state=new_state
         total_reward += reward
+
+    # Epsilon decay
+    epsilon *= epsilon_decay
+    # Keeping a 5% exploration while training
+    epsilon = max(0.05,epsilon)
+
     if win:
         q_table[state][n] = 0
         print(f"We won at episode {ep}, total reward : {total_reward}")
 
     reward_saved.append(total_reward)
 
+
 fig,axes = plt.subplots(1,2)
 axes[0].hist(reward_saved)
 axes[1].plot([i for i in range(EPISODE)],reward_saved)
 plt.savefig("rewards.png")
+
 with open('q_table.pkl','wb') as f:
     pickle.dump(q_table,f)
     print("Q_table saved successfully")
