@@ -16,7 +16,8 @@ The values for each key is a vector of dimesnion 9, one for every action possibl
 
 ### Rewards
 
-The reward are shaped as follow: - +10 for winning
-                                 - -10 for lossing
-                                 - -1 for taking an action
-                                 - -5 for an illegal move
+The reward are shaped as follow:
+- +10 for winning
+- -10 for lossing
+- -1 for taking an action
+- -5 for an illegal move
