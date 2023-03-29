@@ -3,11 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 from matplotlib import style
+from collections import deque
 
 style.use("ggplot")
 
 # Learning variable
-EPISODE = 10_000
+EPISODE = 25_000
 LEARNING_RATE = 0.5
 DISCOUNT = 0.95
 epsilon = 0.95
@@ -31,7 +32,9 @@ def get_action(n):
 
 
 
-reward_saved = []
+win_loss = []
+reward_saved = deque(maxlen=500)
+rolling_avg = []
 
 # Training loop
 for ep in range(EPISODE):
@@ -78,12 +81,18 @@ for ep in range(EPISODE):
         q_table[state][n] = 0
         print(f"We won at episode {ep}, total reward : {total_reward}")
 
+    win_loss.append(1 if win else 0)
     reward_saved.append(total_reward)
 
+    if len(reward_saved) == 500:
+        rolling_avg.append(np.average(reward_saved))
 
-fig,axes = plt.subplots(1,2)
-axes[0].hist(reward_saved)
-axes[1].plot([i for i in range(EPISODE)],reward_saved)
+
+fig,(ax1,ax2) = plt.subplots(1,2)
+ax1.hist(win_loss)
+ax1.set_title("Win/Loss ratio")
+ax2.plot([i for i in range(EPISODE-499)],rolling_avg)
+ax2.set_title("Rolling average reward")
 plt.savefig("rewards.png")
 
 with open('q_table.pkl','wb') as f:
