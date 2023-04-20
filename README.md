@@ -1,4 +1,4 @@
-# Simple implementation of reinforcement Learning
+# Simple implementation of Reinforcement Learning
 
 ## TicTacToe Game
 
@@ -44,8 +44,49 @@ With hundred thousand of episode to train, our agent start to have good results.
 ## Results
 
 After training for hundred thousand of episode the agent is able to win 96% of the time.</br>
-The agent, q_table is saved in a pickle file</br>
+The agent, q_table is saved in a pickle file.</br>
 To load the agent :
 <pre><code>with open("q_table.pkl", "rb") as f:
     q_table = pickle.load(f)
 </code></pre>
+
+Simple loop to run a game and have vizualisation : </br>
+<pre><code>from game import Game
+import pickle
+from rl_agent import get_action
+import numpy as np
+import matplotlib.pyplot as plt
+
+with open("q_table.pkl", "rb") as f:
+    q_table = pickle.load(f)
+
+total_win = 0
+for ep in range(1):
+    total_reward = 0
+    env = Game()
+    state = tuple(env.board.flatten())
+    done = False
+    while not done:
+        n = np.argmax(q_table[state])
+        action = get_action(n)
+        illegal,new_state = env.move(*action)
+        plt.imshow(env.board,cmap="gray")
+        plt.axis('off')
+        plt.show()
+        plt.close()
+        done, reward, win = env.game_state()
+        if illegal:
+            done = True
+
+        state=new_state
+        total_reward += reward
+    if win:
+        total_win+=1</code></pre>
+
+The visualisation is done using matplotlib. So this will display one image per step, where black square is empty space, grey is the square of the agent and white would be the squate of the bot.
+
+## Further improvement
+
+As the bot make random move, we could train our agent by playing against himself. But due to the simplicity of the Tictactoe game this will mostly end in a draw for each game. As a draw will end up having a higher reward than a loss. And a draw is really simple to get in Tictactoe.</br>
+
+A better visualisation of the game could be an improvement as of now this is not really intuitive.
