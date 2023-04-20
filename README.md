@@ -44,7 +44,7 @@ With hundred thousand of episode to train, our agent start to have good results.
 ## Results
 
 After training for hundred thousand of episode the agent is able to win 96% of the time.</br>
-The agent, q_table is saved in a pickle file
+The agent, q_table is saved in a pickle file</br>
 To load the agent :
 <pre><code>with open("q_table.pkl", "rb") as f:
     q_table = pickle.load(f)
